@@ -364,13 +364,5 @@ See **TESTING_GUIDE.md** for comprehensive testing instructions including:
    - Check token expiration
    - Use refresh token to get new access token
 
-## License
 
-This project is open source and available for educational purposes.
-
-## Support
-
-For issues or questions, please refer to the FastAPI documentation or create an issue in the repository.
-
-#   U s e r - M a n a g e m e n t - F A S T - A P I  
  
