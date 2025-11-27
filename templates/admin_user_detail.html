@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #EEEEEE;
+            color: #222831;
+        }
+        .header {
+            background: #76ABAE;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 24px;
+        }
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+        .header button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .user-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .user-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 30px;
+        }
+        .user-info h2 {
+            color: #222831;
+            margin-bottom: 10px;
+        }
+        .user-info .role {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #76ABAE;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .user-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .detail-item {
+            margin-bottom: 20px;
+        }
+        .detail-item label {
+            display: block;
+            color: #222831;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .detail-item .value {
+            color: #222831;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-back {
+            background: #95a5a6;
+            color: white;
+            transition: background 0.3s;
+        }
+        .btn-back:hover {
+            background: #7f8c8d;
+        }
+        .btn-edit {
+            background: #76ABAE;
+            color: white;
+            transition: background 0.3s;
+        }
+        .btn-edit:hover {
+            background: #5a8a8d;
+        }
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+            transition: background 0.3s;
+        }
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>User Details</h1>
+        </div>
+        <div>
+            <a href="/admin/users">Back to Users</a>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="user-card" id="userCard">
+            <div style="text-align: center; padding: 40px;">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        async function getToken() {
+            let token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = '/admin/login';
+                return null;
+            }
+            return token;
+        }
+
+        async function loadUser() {
+            const token = await getToken();
+            if (!token) return;
+
+            const userId = window.location.pathname.split('/').pop();
+
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    window.location.href = '/admin/login';
+                    return;
+                }
+
+                if (!response.ok) {
+                    alert('User not found');
+                    window.location.href = '/admin/users';
+                    return;
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    alert('Invalid response from server');
+                    window.location.href = '/admin/users';
+                    return;
+                }
+
+                const user = await response.json();
+                displayUser(user);
+            } catch (error) {
+                console.error('Error loading user:', error);
+            }
+        }
+
+        function displayUser(user) {
+            const userCard = document.getElementById('userCard');
+            userCard.innerHTML = `
+                <div class="user-header">
+                    ${user.profile_image 
+                        ? `<img src="${user.profile_image}" alt="Profile" class="profile-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Ccircle cx=%2760%27 cy=%2760%27 r=%2760%27 fill=%27%23ddd%27/%3E%3C/svg%3E'">`
+                        : '<div style="width:120px;height:120px;border-radius:50%;background:#ddd;"></div>'
+                    }
+                    <div class="user-info">
+                        <h2>${user.name}</h2>
+                        <span class="role">${user.role}</span>
+                    </div>
+                </div>
+                <div class="user-details">
+                    <div class="detail-item">
+                        <label>User ID</label>
+                        <div class="value">${user.id}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Email</label>
+                        <div class="value">${user.email}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Phone</label>
+                        <div class="value">${user.phone}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Address</label>
+                        <div class="value">${user.address || 'N/A'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>State</label>
+                        <div class="value">${user.state}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>City</label>
+                        <div class="value">${user.city}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Country</label>
+                        <div class="value">${user.country}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Pincode</label>
+                        <div class="value">${user.pincode}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Created At</label>
+                        <div class="value">${new Date(user.created_at).toLocaleString()}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Updated At</label>
+                        <div class="value">${user.updated_at ? new Date(user.updated_at).toLocaleString() : 'N/A'}</div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <a href="/admin/users" class="btn btn-back">Back to Users</a>
+                    <button class="btn btn-edit" onclick="editUser(${user.id})">Edit User</button>
+                    <button class="btn btn-delete" onclick="deleteUser(${user.id})">Delete User</button>
+                </div>
+            `;
+        }
+
+        function editUser(userId) {
+            window.location.href = `/admin/users?edit=${userId}`;
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user?')) return;
+
+            const token = await getToken();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok || response.status === 204) {
+                    alert('User deleted successfully');
+                    window.location.href = '/admin/users';
+                } else {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const error = await response.json();
+                        alert(error.detail || 'Error deleting user');
+                    } else {
+                        alert('Error deleting user');
+                    }
+                }
+            } catch (error) {
+                alert('Error deleting user');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/admin/login';
+        }
+
+        loadUser();
+    </script>
+</body>
+</html>
+

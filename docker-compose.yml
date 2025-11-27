@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  fastapi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-management-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Bind mounts for development - easy file access
+      - ./uploads:/app/uploads
+      - ./data:/app/data
+      # Optional: mount code for hot reload (uncomment for development)
+      # - ./app:/app/app
+      # - ./templates:/app/templates
+      # - ./static:/app/static
+    environment:
+      # Database
+      - DATABASE_URL=sqlite:///./data/user_management.db
+      
+      # JWT Secrets (CHANGE THESE IN PRODUCTION!)
+      - SECRET_KEY=Q7K0GO1wtGWboCkfnWaqyWRoY8332dVOywjTiIk9DPM
+      - REFRESH_SECRET_KEY=Wzrjny-63LtyfD40dyoVNlJmTf6P5LeiHwXm58fbAyM
+      
+      # Token expiration (optional)
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - REFRESH_TOKEN_EXPIRE_DAYS=7
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  # Named volumes (alternative to bind mounts)
+  # uploads_data:
+  # database_data:
+

@@ -1,0 +1,43 @@
+version: '3.8'
+
+# Production configuration
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  fastapi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-management-api-prod
+    ports:
+      - "8000:8000"
+    volumes:
+      # Use named volumes for production (better for Docker management)
+      - uploads_data:/app/uploads
+      - database_data:/app/data
+    environment:
+      # Database
+      - DATABASE_URL=sqlite:///./data/user_management.db
+      
+      # JWT Secrets - MUST BE SET VIA .env FILE IN PRODUCTION!
+      - SECRET_KEY=${SECRET_KEY}
+      - REFRESH_SECRET_KEY=${REFRESH_SECRET_KEY}
+      
+      # Token expiration
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+    restart: always
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  uploads_data:
+    driver: local
+  database_data:
+    driver: local
+

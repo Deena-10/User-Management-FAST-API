@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - User Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #76ABAE 0%, #5a8a8d 100%);
+            color: #222831;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: move 20s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        .login-container {
+            background: #EEEEEE;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .login-header .icon {
+            width: 80px;
+            height: 80px;
+            background: #76ABAE;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(118, 171, 174, 0.3);
+        }
+        .login-header h1 {
+            color: #222831;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #222831;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #76ABAE;
+            z-index: 1;
+        }
+        .input-wrapper.email::before {
+            content: '@';
+        }
+        .input-wrapper.password::before {
+            content: '*';
+        }
+        input {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+            color: #222831;
+        }
+        input:focus {
+            outline: none;
+            border-color: #76ABAE;
+            box-shadow: 0 0 0 4px rgba(118, 171, 174, 0.1);
+            transform: translateY(-2px);
+        }
+        input::placeholder {
+            color: #999;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #76ABAE;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+            z-index: 2;
+        }
+        .password-toggle:hover {
+            color: #5a8a8d;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 16px;
+            background: #76ABAE;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(118, 171, 174, 0.3);
+        }
+        button[type="submit"]:hover {
+            background: #5a8a8d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 171, 174, 0.4);
+        }
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .error {
+            color: #e74c3c;
+            background: #fee;
+            border: 1px solid #fcc;
+        }
+        .success {
+            color: #27ae60;
+            background: #efe;
+            border: 1px solid #cfc;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+            color: #999;
+            font-size: 12px;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #ddd;
+        }
+        .divider span {
+            padding: 0 15px;
+        }
+        .footer-text {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+        .footer-text a {
+            color: #76ABAE;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 25px;
+                border-radius: 15px;
+            }
+            .login-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="icon">A</div>
+            <h1>Welcome Back</h1>
+            <p>Sign in to access the admin panel</p>
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email_or_phone">Email or Phone</label>
+                <div class="input-wrapper email">
+                    <input type="text" id="email_or_phone" name="email_or_phone" placeholder="Enter your email or phone" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper password">
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword()" title="Toggle password visibility">Show</button>
+                </div>
+            </div>
+            <button type="submit">Sign In</button>
+            <div id="message" class="message" style="display: none;"></div>
+        </form>
+        <div class="footer-text">
+            <p>User Management System</p>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.password-toggle');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = 'Hide';
+                toggleBtn.title = 'Hide password';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = 'Show';
+                toggleBtn.title = 'Show password';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '';
+            messageDiv.className = '';
+            messageDiv.style.display = 'none';
+
+            const emailOrPhone = document.getElementById('email_or_phone').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!emailOrPhone || !password) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Please fill in all fields';
+                messageDiv.style.display = 'block';
+                return;
+            }
+
+            const formData = {
+                email_or_phone: emailOrPhone,
+                password: password
+            };
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                // Check status first
+                if (response.status === 401) {
+                    // Try to get error message from JSON response
+                    try {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            messageDiv.className = 'message error';
+                            messageDiv.textContent = errorData.detail || 'Invalid email or password';
+                            messageDiv.style.display = 'block';
+                        } else {
+                            messageDiv.className = 'message error';
+                            messageDiv.textContent = 'Invalid email or password';
+                            messageDiv.style.display = 'block';
+                        }
+                    } catch (e) {
+                        messageDiv.className = 'message error';
+                        messageDiv.textContent = 'Invalid email or password';
+                        messageDiv.style.display = 'block';
+                    }
+                    return;
+                }
+
+                if (!response.ok) {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = 'Login failed. Please try again.';
+                    messageDiv.style.display = 'block';
+                    return;
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = 'Invalid response from server';
+                    messageDiv.style.display = 'block';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok && data.access_token) {
+                    // Store tokens
+                    localStorage.setItem('access_token', data.access_token);
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                    
+                    // Show success message and redirect
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = 'Login successful! Redirecting...';
+                    messageDiv.style.display = 'block';
+                    
+                    // Redirect to admin dashboard - it will check authentication
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 500);
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = data.detail || 'Login failed';
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+                if (error.message && error.message.includes('JSON')) {
+                    messageDiv.textContent = 'Server error. Please check if the server is running.';
+                } else {
+                    messageDiv.textContent = 'An error occurred. Please try again.';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
